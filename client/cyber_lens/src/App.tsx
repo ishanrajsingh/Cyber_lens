@@ -8,9 +8,9 @@ import './App.css';
 
 const Layout = () => {
     return (
-        <div className="layout-container">
+        <div>
             <Navbar />
-            <main className="page-content">
+            <main>
                 <Outlet />
             </main>
             <Footer />
