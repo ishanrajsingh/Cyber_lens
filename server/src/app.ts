@@ -6,16 +6,28 @@ import historyRouter from "./routes/history";
 
 const app = express();
 
-// Middleware
+const corsOrigin = process.env.CORS_ORIGIN;
+
+if (!corsOrigin) {
+  throw new Error("CORS_ORIGIN must be set in environment");
+}
+
 app.use(express.json());
-app.use(cors({
-    origin: "http://localhost:5173",
+
+app.use(
+  cors({
+    origin: corsOrigin,
     credentials: true,
-}));
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "X-Client-ID"],
+  })
+);
+
 app.use(resolveOwner);
 
-// Simple health route
-app.get("/", (_req, res) => res.json({ status: "ok" }));
+app.get("/", (_req, res) => {
+  res.json({ status: "ok" });
+});
 
 app.use("/lookup", lookupRouter);
 app.use("/history", historyRouter);
