@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+import { httpJson } from "../utils/httpClient";
 
 type Row = {
   ioc: string;
   verdict?: "Malicious" | "Clean" | "Suspicious";
   timestamp: string;
+  score?: number;
+};
+
+type HistoryApiRow = {
+  ioc_value: string;
+  verdict?: "Malicious" | "Clean" | "Suspicious";
+  created_at: string;
   score?: number;
 };
 
@@ -16,27 +22,15 @@ export default function History() {
   useEffect(() => {
     async function loadHistory() {
       try {
-        const res = await fetch(`${API_BASE}/history`, {
-          credentials: "include", // safe even if unused
-          headers: {
-            "X-Client-ID": "26121325-8615-4c56-a122-5bb85a91c648"
-          }
-        });
-  
-        if (!res.ok) {
-          throw new Error("Failed to fetch history");
-        }
-  
-        const data = await res.json();
-  
-        const mapped: Row[] = data.map((r: any) => ({
+        const data = await httpJson<HistoryApiRow[]>("/history");
+
+        const mapped: Row[] = data.map((r) => ({
           ioc: r.ioc_value,
           verdict: r.verdict ?? undefined,
           timestamp: new Date(r.created_at).toLocaleString(),
           score: r.score ?? undefined,
         }));
 
-  
         setRows(mapped);
       } catch (err) {
         console.error(err);
@@ -44,20 +38,19 @@ export default function History() {
         setLoading(false);
       }
     }
-  
+
     loadHistory();
   }, []);
-
 
   const badgeClass = (v: string) =>
     v === "Malicious"
       ? "bg-red-600/10 text-red-400 ring-red-600/30"
       : v === "Clean"
-      ? "bg-emerald-600/10 text-emerald-400 ring-emerald-600/30"
-      : v === "Suspicious"
-      ? "bg-amber-500/10 text-amber-400 ring-amber-500/30"
-      : "bg-neutral-600/10 text-neutral-400 ring-neutral-600/30";
-  
+        ? "bg-emerald-600/10 text-emerald-400 ring-emerald-600/30"
+        : v === "Suspicious"
+          ? "bg-amber-500/10 text-amber-400 ring-amber-500/30"
+          : "bg-neutral-600/10 text-neutral-400 ring-neutral-600/30";
+
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-400 flex items-center justify-center">
@@ -115,7 +108,7 @@ export default function History() {
                 </div>
                 <span
                   className={`px-2 py-0.5 text-xs font-medium ring-1 ${badgeClass(
-                    row.verdict!
+                    row.verdict!,
                   )}`}
                 >
                   {row.verdict || "Unknown"}
@@ -125,7 +118,6 @@ export default function History() {
               <div className="mt-2 text-sm text-neutral-300">
                 {row.score ?? "—"}
               </div>
-
 
               <div className="mt-3 text-xs text-neutral-400">
                 {row.timestamp}
@@ -156,7 +148,7 @@ export default function History() {
               </thead>
 
               <tbody>
-              {rows.map((row, idx) => (
+                {rows.map((row, idx) => (
                   <tr
                     key={idx}
                     className="hover:bg-neutral-900 transition-colors"
@@ -168,7 +160,7 @@ export default function History() {
                     <td className="border border-neutral-800 px-4 py-3">
                       <span
                         className={`inline-flex items-center gap-2 px-2.5 py-1 text-xs font-medium ring-1 ${badgeClass(
-                          row.verdict!
+                          row.verdict!,
                         )}`}
                       >
                         <span
@@ -176,10 +168,10 @@ export default function History() {
                             row.verdict === "Malicious"
                               ? "bg-red-400"
                               : row.verdict === "Clean"
-                              ? "bg-emerald-400"
-                              : row.verdict === "Suspicious"
-                              ? "bg-amber-400"
-                              : "bg-neutral-400"
+                                ? "bg-emerald-400"
+                                : row.verdict === "Suspicious"
+                                  ? "bg-amber-400"
+                                  : "bg-neutral-400"
                           }`}
                         />
                         {row.verdict || "Unknown"}
@@ -200,8 +192,7 @@ export default function History() {
           </div>
 
           <div className="mt-3 text-xs text-neutral-500">
-            Showing {rows.length} recent scans — optimized for analyst
-            review.
+            Showing {rows.length} recent scans — optimized for analyst review.
           </div>
         </div>
       </div>
