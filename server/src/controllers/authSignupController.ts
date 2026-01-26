@@ -37,7 +37,7 @@ export async function authSignupController(
       await sendEmail({
         to: email,
         subject: "Verify your email address",
-        text: `Welcome to Cyber Lens!\n\nPlease verify your email address by clicking the link below:\n${verificationLink}\n\nIf you did not sign up, you can ignore this email.`,
+        verificationLink,
       });
     } catch (emailError) {
       console.error("Failed to send verification email:", emailError);
