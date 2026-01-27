@@ -22,11 +22,11 @@ const VerifyEmail: React.FC = () => {
       `/auth/verify-email?token=${encodeURIComponent(token)}`,
     )
       .then((res) => {
-        if (res.status === "success") {
+        if (res.status === "verified") {
           setStatus("success");
           setMessage("Your email has been verified successfully.");
           setTimeout(() => navigate("/login"), 2000);
-        } else if (res.status === "already-verified") {
+        } else if (res.status === "already_verified") {
           setStatus("already");
           setMessage("Your email is already verified.");
           setTimeout(() => navigate("/login"), 2000);
