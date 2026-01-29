@@ -40,16 +40,8 @@ async function resolveOwner(
   }
 
   try {
-    // Check if this is a registered user
-    const userResult = await pool.query("SELECT id FROM users WHERE id = $1", [clientId]);
-    
-    if (userResult.rows.length > 0) {
-      req.owner = { type: "user", id: clientId };
-    } else {
-      // Fallback to anonymous client logic
-      await ensureAnonymousClient(clientId);
-      req.owner = { type: "anonymous", id: clientId };
-    }
+    await ensureAnonymousClient(clientId);
+    req.owner = { type: "anonymous", id: clientId };
     next();
   } catch (error) {
     console.error("Failed to resolve owner", error);
